@@ -16,6 +16,7 @@ ENV PATH "$HOME/.cargo/bin:$PATH"
 
 RUN echo $PATH
 RUN ls -al $HOME/.cargo/bin
+RUN $HOME/.cargo/bin/rustc --version
 RUN PATH=$PATH rustc --version
 
 CMD ["rustc", "--version"]
