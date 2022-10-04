@@ -20,7 +20,7 @@ concurrency:
 
 env:
   DOCKER_BUILDKIT: '1'
-  TARGET_PLATFORMS: "linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/mips64le,linux/arm/v7"
+  TARGET_PLATFORMS: "linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/arm/v7"
 
 defaults:
   run:
