@@ -21,7 +21,7 @@ concurrency:
 env:
   DOCKER_BUILDKIT: '1'
   # TARGET_PLATFORMS: "linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/mips64le,linux/arm/v7"
-  TARGET_PLATFORMS: "linux/ppc64le"
+  TARGET_PLATFORMS: "linux/ppc64le,linux/s390x"
 
 defaults:
   run:
@@ -40,11 +40,21 @@ jobs:
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       -
+        name: Create buildkitd config override
+        run: |
+          echo "experimantal = true" > /tmp/buildkitd.toml
+          echo "debug = true" > /tmp/buildkitd.toml
+          echo 'insecure-entitlements = [ "security.insecure" ]' >> /tmp/buildkitd.toml
+          echo "[worker.oci]" >> /tmp/buildkitd.toml
+          echo "  max-parallelism = 1" >> /tmp/buildkitd.toml
+          cat /tmp/buildkitd.toml
+      -
         name: Set up Docker Buildx security.insecure
         uses: docker/setup-buildx-action@v2
         with:
-          buildkitd-flags: --debug --allow-insecure-entitlement security.insecure
-      -
+          $ buildkitd-flags: --debug --allow-insecure-entitlement security.insecure
+          config: /tmp/buildkitd.toml
+     -
         name: Build for ${{ env.TARGET_PLATFORMS }}
         uses: docker/build-push-action@v3
         with:
