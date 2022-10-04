@@ -1,0 +1,102 @@
+name: "Test rustup with security-insecure See: https://github.com/rust-lang/rustup/issues/2700"
+
+# Requires settings to allow the security.insecure entitlement in 4 places.
+# 1. In docker/setup-buildx-action either with buildkitd-flags, inline-config, or override buildkitd.toml
+# 2. In docker/build-push-action with the `allow: security.insecure`
+# 3. In the dockerfile, add `# syntax=docker/dockerfile:experimental` at the top
+# 4. Use `RUN --security=insecure` for the line curling rustup.rs
+
+on:
+  push:
+    branches:
+      - "*"
+  pull_request:
+    branches:
+      - "*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_BUILDKIT: '1'
+  TARGET_PLATFORMS: "linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/arm/v7"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  rustup:
+    strategy:
+      matrix:
+        set-config: [ "default", "flags", "toml", "inline" ]
+      fail-fast: false
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - if: matrix.set-config == 'toml'
+        name: Create buildkitd config override
+        run: |
+          echo "experimantal = true" > /tmp/buildkitd.toml
+          echo "debug = true" > /tmp/buildkitd.toml
+          echo 'insecure-entitlements = [ "security.insecure" ]' >> /tmp/buildkitd.toml
+          cat /tmp/buildkitd.toml
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        if: matrix.set-config == 'flags'
+        name: Set up Docker Buildx with buildkit flags
+        uses: docker/setup-buildx-action@v2
+        with:
+          buildkitd-flags: --debug --allow-insecure-entitlement security.insecure
+      -
+        if: matrix.set-config == 'inline'
+        name: Set up Docker Buildx with inline buildkit config
+        uses: docker/setup-buildx-action@v2
+        with:
+          buildkitd-flags: --debug
+          config-inline: |
+            debug = true
+            experimental = true
+            insecure-entitlements = ["security.insecure" ]
+      -
+        if: matrix.set-config == 'toml'
+        name: Set up Docker Buildx with custom buildkit toml config
+        uses: docker/setup-buildx-action@v2
+        with:
+          buildkitd-flags: --debug
+          config: /tmp/buildkitd.toml
+      -
+        if: matrix.set-config == 'default'
+        name: Set up Docker Buildx with defaults
+        uses: docker/setup-buildx-action@v2
+#        with:
+#           Cannot set debug this way, it overrides the defaults
+#           buildkitd-flags: --debug
+      -
+        name: Build for ${{ env.TARGET_PLATFORMS }}
+        uses: docker/build-push-action@v3
+        with:
+          file: Dockerfile.rustup
+          platforms: ${{ env.TARGET_PLATFORMS }}
+          push: false
+          allow: |
+            security.insecure
+      -
+        name: Build and load on host arch
+        uses: docker/build-push-action@v3
+        with:
+          file: Dockerfile.rustup
+          tags: test-rustup:latest
+          load: true
+          push: false
+          allow: |
+            security.insecure
+      -
+        name: Test image
+        uses: addnab/docker-run-action@v3
+        with:
+          image: test-rustup:latest
