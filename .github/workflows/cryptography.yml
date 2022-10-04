@@ -9,7 +9,7 @@ name: "Build cryptography wheels with security-insecure"
 on:
   push:
     branches:
-      - "*"
+      - "main" 
   pull_request:
     branches:
       - "*"
