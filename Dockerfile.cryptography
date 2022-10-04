@@ -23,12 +23,18 @@ ENV VENV_DIR $HOME/venv
 
 RUN python -m venv $VENV_DIR --upgrade --upgrade-deps
 
-ENV PATH "$CARGO_HOME/bin:$VENV_DIR/bin:$VENV_DIR/local/bin:$PATH"
+ENV PATH "$VENV_DIR/bin:$VENV_DIR/local/bin:$PATH"
 RUN pip install --upgrade wheel setuptools-rust setuptools-scm
+
+ENV CARGO_HOME "$HOME/.cargo
+ENV RUSTUP_HOME "$HOME/.rustup"
+ENV RUSTUP_PERMIT_COPY_RENAME "yes"
+ENV RUSTUP_IO_THREADS 1
+ENV CARGO_TERM_VERBOSE 3
 
 RUN --security=insecure curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sed 's#/proc/self/exe#$SHELL#g' | sh -s -- -y --profile minimal --default-toolchain nightly
 
-ENV CARGO_HOME "$HOME/.cargo"
+ENV PATH "$RUSTUP_HOME/bin:$CARGO_HOME/bin:$PATH"
 
 ENV WHEELS $HOME/wheels
 RUN mkdir -p $WHEELS
@@ -36,6 +42,9 @@ RUN mkdir -p $WHEELS
 RUN rustc --version
 RUN cargo --version
 RUN rustup --version
+
+RUN cargo -V
+RUN rustup default
 
 ENV CARGO "$CARGO_HOME/bin/cargo"
 RUN --security=insecure pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
