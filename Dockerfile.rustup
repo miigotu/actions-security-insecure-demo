@@ -9,14 +9,14 @@ ENV HOME "/home/rust-test"
 RUN useradd -d $HOME -m -s /bin/sh rust-test
 USER rust-test
 
-#RUN --security=insecure curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | RUSTUP_CPUTYPE=i686 SHELL=$SHELL PATH=$PATH HOME=$HOME sh -s -- -y --profile minimal --default-toolchain nightly
-RUN --security=insecure curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sed 's#/proc/self/exe#$SHELL#g' | RUSTUP_CPUTYPE=i686 SHELL=$SHELL PATH=$PATH HOME=$HOME sh -s -- -y --profile minimal --default-toolchain nightly
+#RUN --security=insecure SHELL=$SHELL PATH=$PATH HOME=$HOME curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain nightly
+RUN --security=insecure SHELL=$SHELL PATH=$PATH HOME=$HOME curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sed 's#/proc/self/exe#$SHELL#g' | sh -s -- -y --profile minimal --default-toolchain nightly
 
 ENV PATH "$HOME/.cargo/bin:$PATH"
 
 RUN echo $PATH
 RUN ls -al $HOME/.cargo/bin
 RUN $HOME/.cargo/bin/rustc --version
-RUN rustc --version
+RUN PATH=$PATH rustc --version
 
 CMD ["rustc", "--version"]
