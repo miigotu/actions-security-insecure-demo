@@ -36,6 +36,7 @@ RUN rustc --version
 RUN cargo --version
 RUN rustup --version
 
+ENV CARGO "$CARGO_HOME/bin/cargo"
 RUN --security=insecure pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
 
 RUN rm -rf $WHEELS/*none-any.whl && rm -rf $WHEELS/*.gz;
