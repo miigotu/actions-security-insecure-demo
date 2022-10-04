@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:experimental
-FROM python:3.10-slim as builder
+ARG PYVER=3.10
+FROM python:$PYVER-slim as builder
 
 # Before switching user
 RUN apt-get update -qq && apt-get install -yqq \
@@ -35,7 +36,7 @@ RUN rustc --version
 RUN cargo --version
 RUN rustup --version
 
-RUN --mount=type=tmpfs,target=$CARGO_HOME pip download cryptography --no-binary cryptography --wheel-dir $WHEELS
+RUN --mount=type=tmpfs,target=$CARGO_HOME pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
 
 RUN rm -rf $WHEELS/*none-any.whl && rm -rf $WHEELS/*.gz;
 
