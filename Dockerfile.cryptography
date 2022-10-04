@@ -21,7 +21,7 @@ ENV PIP_NO_CACHE_DIR=off
 
 ENV VENV_DIR $HOME/venv
 
-RUN python3-m venv $VENV_DIR --upgrade --upgrade-deps
+RUN python -m venv $VENV_DIR --upgrade --upgrade-deps
 RUN pip install --upgrade wheel setuptools-rust setuptools-scm
 
 RUN --security=insecure curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sed 's#/proc/self/exe#$SHELL#g' | sh -s -- -y --profile minimal --default-toolchain nightly
