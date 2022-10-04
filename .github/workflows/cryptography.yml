@@ -29,8 +29,8 @@ defaults:
 jobs:
   cryptography:
     strategy:
-#      matrix:
-#        python-version: [ ]
+      matrix:
+        python-version: ["3.10']
       fail-fast: false
     continue-on-error: true
     runs-on: ubuntu-latest
@@ -52,8 +52,10 @@ jobs:
           file: Dockerfile.cryptography
           cache-to: type=gha,mode=max
           cache-from: type=gha
+          build-args: PYVER="3.10" 
           target: wheels
           push: false
+            PYVER: 
           allow: |
             security.insecure
       -
