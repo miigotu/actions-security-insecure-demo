@@ -82,6 +82,8 @@ jobs:
         with:
           file: Dockerfile.rustup
           platforms: ${{ env.TARGET_PLATFORMS }}
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
           push: false
           allow: |
             security.insecure
@@ -90,6 +92,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           file: Dockerfile.rustup
+          platforms: ${{ env.TARGET_PLATFORMS }}
           tags: test-rustup:latest
           load: true
           push: false
