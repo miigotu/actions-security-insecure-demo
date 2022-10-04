@@ -9,7 +9,7 @@ curl findutils && apt-get clean -yqq && rm -rf /var/lib/apt/lists/*
 
 ENV SHELL "/bin/sh"
 ENV HOME "/home/rust-test"
-RUN useradd -d $HOME -m -s /bin/sh rust-test
+RUN useradd -d $HOME -m -s $HOME rust-test
 USER rust-test
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -36,7 +36,7 @@ RUN rustc --version
 RUN cargo --version
 RUN rustup --version
 
-RUN pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
+RUN --security=insecure pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
 
 RUN rm -rf $WHEELS/*none-any.whl && rm -rf $WHEELS/*.gz;
 
