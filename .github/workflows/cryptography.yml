@@ -52,7 +52,7 @@ jobs:
           file: Dockerfile.cryptography
           cache-to: type=gha,mode=max
           cache-from: type=gha
-          build-args: PYVER=${{ matrix.PYVER }} 
+          build-args: PYVER=${{ matrix.python-version }} 
           target: wheels
           push: false
           allow: |
