@@ -26,7 +26,7 @@ RUN python -m venv $VENV_DIR --upgrade --upgrade-deps
 ENV PATH "$VENV_DIR/bin:$VENV_DIR/local/bin:$PATH"
 RUN pip install --upgrade wheel setuptools-rust setuptools-scm
 
-ENV CARGO_HOME "$HOME/.cargo
+ENV CARGO_HOME "$HOME/.cargo" 
 ENV RUSTUP_HOME "$HOME/.rustup"
 ENV RUSTUP_PERMIT_COPY_RENAME "yes"
 ENV RUSTUP_IO_THREADS 1
