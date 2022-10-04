@@ -92,7 +92,8 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           file: Dockerfile.rustup
-          platforms: ${{ env.TARGET_PLATFORMS }}
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
           tags: test-rustup:latest
           load: true
           push: false
