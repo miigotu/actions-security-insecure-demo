@@ -6,10 +6,9 @@ RUN apt-get update -qq && apt-get install -yqq curl && apt-get clean -yqq && rm 
 
 ENV SHELL "/bin/sh"
 ENV HOME "/home/rust-test"
-RUN useradd -d $HOME -m -s /bin/sh rust-test
+RUN useradd -d $HOME -m -s $SHELL rust-test
 USER rust-test
 
-#RUN --security=insecure curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain nightly
 RUN --security=insecure curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sed 's#/proc/self/exe#$SHELL#g' | sh -s -- -y --profile minimal --default-toolchain nightly
 
 ENV PATH "$HOME/.cargo/bin:$PATH"
