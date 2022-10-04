@@ -21,13 +21,13 @@ ENV PIP_NO_CACHE_DIR=off
 
 ENV VENV_DIR $HOME/venv
 
-RUN python3 -m venv $VENV_DIR --upgrade --upgrade-deps
+RUN python3-m venv $VENV_DIR --upgrade --upgrade-deps
 RUN pip install --upgrade wheel setuptools-rust setuptools-scm
 
 RUN --security=insecure curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sed 's#/proc/self/exe#$SHELL#g' | sh -s -- -y --profile minimal --default-toolchain nightly
 
 ENV CARGO_HOME "$HOME/.cargo"
-ENV PATH "$CARGO_HOME/bin:$PATH"
+ENV PATH "$CARGO_HOME/bin:$VENV/bin:$VENV/local/bin:$PATH"
 
 ENV WHEELS $HOME/wheels
 RUN mkdir -p $WHEELS
@@ -36,7 +36,7 @@ RUN rustc --version
 RUN cargo --version
 RUN rustup --version
 
-RUN --mount=type=tmpfs,target=$CARGO_HOME pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
+RUN pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
 
 RUN rm -rf $WHEELS/*none-any.whl && rm -rf $WHEELS/*.gz;
 
