@@ -47,11 +47,11 @@ jobs:
         name: Build for ${{ env.TARGET_PLATFORMS }}
         uses: docker/build-push-action@v3
         with:
-          cache-to: type=local,dest=/tmp/.buildx-cache-wheels-new
-          cache-from: type=local,src=/tmp/.buildx-cache-wheels
           outputs: type=local,dest=/tmp/cryptography-wheels
           platforms: ${{ env.TARGET_PLATFORMS }}
           file: Dockerfile.cryptography
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
           target: wheels
           push: false
           allow: |
@@ -96,7 +96,3 @@ jobs:
         with:
           name: linux_s390x
           path: /tmp/cryptography-wheels/linux_s390x
-      -
-        name: Move wheels docker cache to prevent cache leak
-        run: |
-          if [ -e /tmp/.buildx-cache-wheels-new ]; then rm -rf /tmp/.buildx-cache-wheels && mv /tmp/.buildx-cache-wheels-new /tmp/.buildx-cache-wheels; fi
