@@ -31,8 +31,8 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10']
-      fail-fast: false
-    continue-on-error: true
+      fail-fast: true
+    continue-on-error: false
     runs-on: ubuntu-latest
     steps:
       -
