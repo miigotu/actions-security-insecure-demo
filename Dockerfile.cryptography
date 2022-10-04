@@ -22,12 +22,13 @@ ENV PIP_NO_CACHE_DIR=off
 ENV VENV_DIR $HOME/venv
 
 RUN python -m venv $VENV_DIR --upgrade --upgrade-deps
+
+ENV PATH "$CARGO_HOME/bin:$VENV_DIR/bin:$VENV_DIR/local/bin:$PATH"
 RUN pip install --upgrade wheel setuptools-rust setuptools-scm
 
 RUN --security=insecure curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sed 's#/proc/self/exe#$SHELL#g' | sh -s -- -y --profile minimal --default-toolchain nightly
 
 ENV CARGO_HOME "$HOME/.cargo"
-ENV PATH "$CARGO_HOME/bin:$VENV/bin:$VENV/local/bin:$PATH"
 
 ENV WHEELS $HOME/wheels
 RUN mkdir -p $WHEELS
