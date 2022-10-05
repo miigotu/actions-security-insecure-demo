@@ -1,0 +1,111 @@
+name: "Build cryptography wheels with security-insecure"
+
+# Requires settings to allow the security.insecure entitlement in 4 places.
+# 1. In docker/setup-buildx-action either with buildkitd-flags, inline-config, or override buildkitd.toml
+# 2. In docker/build-push-action with the `allow: security.insecure`
+# 3. In the dockerfile, add `# syntax=docker/dockerfile:experimental` at the top
+# 4. Use `RUN --security=insecure` for the line curling rustup.rs
+
+on:
+  push:
+    branches:
+      - "main" 
+  pull_request:
+    branches:
+      - "*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_BUILDKIT: '1'
+  # TARGET_PLATFORMS: "linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/mips64le,linux/arm/v7"
+  TARGET_PLATFORMS: "linux/ppc64le,linux/s390x,linux/mips64le,linux/amd64,linux/arm64"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  cryptography:
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+      fail-fast: true
+    continue-on-error: false
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      -
+        name: Create buildkitd config override
+        run: |
+          echo 'experimantal = true' > /tmp/buildkitd.toml
+          echo 'debug = true' >> /tmp/buildkitd.toml
+          echo 'insecure-entitlements  = [ "security.insecure" ]' >> /tmp/buildkitd.toml
+          echo '[worker.oci]' >> /tmp/buildkitd.toml
+          echo 'max-parallelism = 1' >> /tmp/buildkitd.toml
+          cat /tmp/buildkitd.toml
+      -
+        name: Set up Docker Buildx security.insecure
+        uses: docker/setup-buildx-action@v2
+        with:
+          # buildkitd-flags: --debug --allow-insecure-entitlement security.insecure
+          config: /tmp/buildkitd.toml
+      -
+        name: Build for ${{ env.TARGET_PLATFORMS }}
+        uses: docker/build-push-action@v3
+        with:
+          outputs: type=local,dest=/tmp/cryptography-wheels
+          platforms: ${{ env.TARGET_PLATFORMS }}
+          file: Dockerfile.cryptography
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
+          build-args: |
+            PYVER=${{ matrix.python-version }}
+          target: wheels
+          push: false
+          allow: |
+            security.insecure
+      -
+        name: List wheels'
+        run: |
+          ls -R /tmp/cryptography-wheels
+      -
+        name: Upload linux/amd64 wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux_amd64
+          path: /tmp/cryptography-wheels/linux_amd64
+      -
+        name: Upload linux/arm64 wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux_arm64
+          path: /tmp/cryptography-wheels/linux_arm64
+      -
+        name: Upload linux/arm/v7 wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux_arm_v7
+          path: /tmp/cryptography-wheels/linux_arm_v7
+      -
+        name: Upload linux/ppc64le wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux_ppc64le
+          path: /tmp/cryptography-wheels/linux_ppc64le
+      -
+        name: Upload linux/mips64le wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux_mips64le 
+          path: /tmp/cryptography-wheels/linux_mips64le
+      -
+        name: Upload linux/s390x wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux_s390x
+          path: /tmp/cryptography-wheels/linux_s390x

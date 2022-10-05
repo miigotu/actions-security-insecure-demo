@@ -3,7 +3,7 @@ name: Test security-insecure in GitHub actions, with docker/setup-buildx-action 
 on:
   push:
     branches:
-      - "*"
+      - "main"
   pull_request:
     branches:
       - "*"
@@ -77,6 +77,8 @@ jobs:
         with:
           file: ${{ matrix.dockerfile }}
           platforms: "linux/arm/v7"
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
           push: false
           allow: |
             security.insecure
@@ -85,6 +87,8 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           file: ${{ matrix.dockerfile }}
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
           tags: test-image:latest
           load: true
           push: false

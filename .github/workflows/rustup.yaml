@@ -9,7 +9,7 @@ name: "Test rustup with security-insecure See: https://github.com/rust-lang/rust
 on:
   push:
     branches:
-      - "*"
+      - "main"
   pull_request:
     branches:
       - "*"
@@ -82,6 +82,8 @@ jobs:
         with:
           file: Dockerfile.rustup
           platforms: ${{ env.TARGET_PLATFORMS }}
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
           push: false
           allow: |
             security.insecure
@@ -90,6 +92,8 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           file: Dockerfile.rustup
+          cache-to: type=gha,mode=max
+          cache-from: type=gha
           tags: test-rustup:latest
           load: true
           push: false

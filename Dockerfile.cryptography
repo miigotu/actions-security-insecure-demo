@@ -1,0 +1,62 @@
+# syntax=docker/dockerfile:experimental
+ARG PYVER=3.10
+FROM python:$PYVER-slim as builder
+
+# Before switching user
+RUN apt-get update -qq && apt-get install -yqq \
+build-essential libssl-dev libffi-dev python3-dev \
+curl findutils && apt-get clean -yqq && rm -rf /var/lib/apt/lists/*
+
+ENV SHELL "/bin/sh"
+ENV HOME "/home/rust-test"
+RUN useradd -d $HOME -m -s $HOME rust-test
+USER rust-test
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONIOENCODING="UTF-8"
+ENV PYTHONUNBUFFERED=1
+
+ENV PIP_DEFAULT_TIMEOUT=100
+ENV PIP_NO_CACHE_DIR=off
+
+ENV VENV_DIR $HOME/venv
+
+RUN python -m venv $VENV_DIR --upgrade --upgrade-deps
+
+ENV PATH "$VENV_DIR/bin:$VENV_DIR/local/bin:$PATH"
+RUN pip install --upgrade wheel setuptools-rust setuptools-scm
+
+ENV CARGO_HOME "$HOME/.cargo" 
+ENV RUSTUP_HOME "$HOME/.rustup"
+ENV RUSTUP_PERMIT_COPY_RENAME "yes"
+ENV RUSTUP_IO_THREADS 1
+ENV CARGO_TERM_VERBOSE "true"
+
+RUN --security=insecure curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sed 's#/proc/self/exe#$SHELL#g' | sh -s -- -y --profile minimal --default-toolchain nightly
+
+ENV PATH "$RUSTUP_HOME/bin:$CARGO_HOME/bin:$PATH"
+
+ENV WHEELS $HOME/wheels
+RUN mkdir -p $WHEELS
+
+RUN rustc --version
+RUN cargo --version
+RUN rustup --version
+
+RUN cargo -V
+RUN rustup default
+
+ENV CARGO "$CARGO_HOME/bin/cargo"
+
+ARG CARGO_BIND
+ENV CARGO_BIND=$CARGO_BIND
+RUN --mount=type=tmpfs,target=$CARGO_HOME pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
+
+RUN rm -rf $WHEELS/*none-any.whl && rm -rf $WHEELS/*.gz;
+
+CMD ["sh", "-c", "ls -lR $WHEELS"]
+
+FROM scratch AS wheels
+COPY --from=builder /home/rust-test/wheels /
+
+
