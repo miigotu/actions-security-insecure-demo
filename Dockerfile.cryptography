@@ -50,7 +50,7 @@ ENV CARGO "$CARGO_HOME/bin/cargo"
 
 ARG CARGO_BIND
 ENV CARGO_BIND=$CARGO_BIND
-RUN --mount=type=bind,source=$CARGO_BIND,target=$CARGO_HOME pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
+RUN --mount=type=tmpfs,target=$CARGO_HOME pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
 
 RUN rm -rf $WHEELS/*none-any.whl && rm -rf $WHEELS/*.gz;
 
