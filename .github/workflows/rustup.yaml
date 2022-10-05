@@ -9,7 +9,7 @@ name: "Test rustup with security-insecure See: https://github.com/rust-lang/rust
 on:
   push:
     branches:
-      - "*"
+      - "main"
   pull_request:
     branches:
       - "*"
