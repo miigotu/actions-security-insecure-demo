@@ -3,7 +3,7 @@ name: Test security-insecure in GitHub actions, with docker/setup-buildx-action 
 on:
   push:
     branches:
-      - "*"
+      - "main"
   pull_request:
     branches:
       - "*"
