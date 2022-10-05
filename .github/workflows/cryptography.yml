@@ -55,6 +55,9 @@ jobs:
           # buildkitd-flags: --debug --allow-insecure-entitlement security.insecure
           config: /tmp/buildkitd.toml
       -
+        name: Create cargo home bind dir
+        run: mkdir -p /tmp/cargo
+      -
         name: Build for ${{ env.TARGET_PLATFORMS }}
         uses: docker/build-push-action@v3
         with:
