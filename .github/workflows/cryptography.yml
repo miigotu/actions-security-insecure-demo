@@ -21,7 +21,7 @@ concurrency:
 env:
   DOCKER_BUILDKIT: '1'
   # TARGET_PLATFORMS: "linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/mips64le,linux/arm/v7"
-  TARGET_PLATFORMS: "linux/ppc64le,linux/s390x,linux/mips64le,Linux/amd64,Linux/arm64,Linux/arm/v7"
+  TARGET_PLATFORMS: "linux/ppc64le,linux/s390x,linux/mips64le,linux/amd64,linux/arm64"
 
 defaults:
   run:
@@ -55,9 +55,6 @@ jobs:
           # buildkitd-flags: --debug --allow-insecure-entitlement security.insecure
           config: /tmp/buildkitd.toml
       -
-        name: Create cargo home bind dir
-        run: mkdir -p "$(PWD)/cargo-bind"
-      -
         name: Build for ${{ env.TARGET_PLATFORMS }}
         uses: docker/build-push-action@v3
         with:
@@ -68,7 +65,6 @@ jobs:
           cache-from: type=gha
           build-args: |
             PYVER=${{ matrix.python-version }}
-            CARGO_BIND="$(PWD)/cargo-bind"
           target: wheels
           push: false
           allow: |
