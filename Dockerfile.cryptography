@@ -47,7 +47,10 @@ RUN cargo -V
 RUN rustup default
 
 ENV CARGO "$CARGO_HOME/bin/cargo"
-RUN --mount=type=bind,source=/cargo-bind,target=$CARGO_HOME pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
+
+ARG CARGO_BIND
+ENV CARGO_BIND=$CARGO_BIND
+RUN --mount=type=bind,source=$CARGO_BIND,target=$CARGO_HOME pip wheel cryptography --no-binary cryptography --wheel-dir $WHEELS
 
 RUN rm -rf $WHEELS/*none-any.whl && rm -rf $WHEELS/*.gz;
 
