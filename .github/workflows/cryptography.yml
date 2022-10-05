@@ -56,7 +56,7 @@ jobs:
           config: /tmp/buildkitd.toml
       -
         name: Create cargo home bind dir
-        run: mkdir /cargo-bind
+        run: mkdir -p "$(PWD)/cargo-bind"
       -
         name: Build for ${{ env.TARGET_PLATFORMS }}
         uses: docker/build-push-action@v3
@@ -66,7 +66,9 @@ jobs:
           file: Dockerfile.cryptography
           cache-to: type=gha,mode=max
           cache-from: type=gha
-          build-args: PYVER=${{ matrix.python-version }} 
+          build-args: |
+            PYVER=${{ matrix.python-version }}
+            CARGO_BIND="$(PWD)/cargo-bind"
           target: wheels
           push: false
           allow: |
